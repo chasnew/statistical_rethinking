@@ -1,0 +1,66 @@
+---
+title: "Week 1 assignment"
+output: html_notebook
+---
+
+```{r message=FALSE}
+library(tidyverse)
+library(rethinking)
+```
+
+
+```{r}
+p_grid <- seq(0, 1, length.out=1000)
+prob_p <- rep(1, 1000)
+prob_data <- dbinom(8, size = 15, prob = p_grid)
+posterior <- prob_data * prob_p
+posterior <- posterior / sum(posterior)
+
+result <- data.frame(p_grid, posterior)
+
+ggplot(data = result, aes(p_grid, posterior)) +
+  geom_line()
+```
+
+```{r}
+p_grid <- seq(0, 1, length.out=1000)
+prob_p <- cbind(rep(0,500), rep(1, 500))
+prob_data <- dbinom(8, size = 15, prob = p_grid)
+posterior <- prob_data * prob_p
+posterior <- posterior / sum(posterior)
+
+result <- data.frame(p_grid, posterior)
+
+ggplot(data = result, aes(p_grid, posterior)) +
+  geom_line() + geom_vline(xintercept = 0.7, color = "red")
+```
+
+```{r}
+set.seed(123)
+
+calc_perc_interval <- function(N) {
+  
+  p_true <- 0.7
+  W <- rbinom(1, size = N, prob=p_true)
+  
+  p_grid <- seq(0, 1, length.out=1000)
+  prob_p <- rep(1, 1000)
+  prob_data <- dbinom(W, size = N, prob = p_grid)
+  posterior <- prob_data * prob_p
+  posterior <- posterior / sum(posterior)
+  
+  post_samples <- sample(p_grid, prob = posterior, size = 1e4, replace = TRUE)
+  pi99 <- PI(post_samples, 0.99)
+  
+  return(as.numeric(pi99[2] - pi99[1]))
+}
+
+N_list <- c(50, 100, 500, 1000, 2500, 5000)
+N_list <- rep(N_list, each = 100)
+pi_widths <- sapply(N_list, calc_perc_interval)
+
+pi_results <- data.frame("n" = N_list, "pi_width" = pi_widths)
+ggplot(pi_results, aes(x = n, y = pi_width)) +
+  geom_point() + geom_hline(yintercept = 0.05, color = "red")
+```
+
