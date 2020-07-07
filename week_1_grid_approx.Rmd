@@ -50,7 +50,7 @@ calc_perc_interval <- function(N) {
   posterior <- posterior / sum(posterior)
   
   post_samples <- sample(p_grid, prob = posterior, size = 1e4, replace = TRUE)
-  pi99 <- PI(post_samples, 0.99)
+  pi99 <- quantile(post_samples, c(0.005, 0.995))
   
   return(as.numeric(pi99[2] - pi99[1]))
 }
