@@ -1,5 +1,5 @@
 ---
-title: "Week 3"
+title: "Week 3, Chapter 5: The Many Variables & The Spurious Waffles"
 output: html_notebook
 ---
 
